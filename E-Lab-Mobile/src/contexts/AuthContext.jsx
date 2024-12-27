@@ -71,8 +71,10 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       await AsyncStorage.removeItem("accessToken");
+      await AsyncStorage.removeItem("refreshToken");
       await AsyncStorage.removeItem("role");
       setAccessToken(null);
+      setRefreshToken(null);
       setRole(null);
       setIsAuthenticated(false);
     } catch (error) {

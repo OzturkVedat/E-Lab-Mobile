@@ -21,13 +21,20 @@ const LoginScreen = () => {
   const handleLogin = async () => {
     setLoading(true);
     try {
-      await login(formData); // authContext'e yolla
+      await login(formData); // Send credentials to authContext
 
       if (role === "Admin") {
-        // role göre kullanıcıyı yönlendir
-        navigation.navigate("AdminHome");
+        // Navigate to the Admin Tab Navigation screen
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "AdminTabs" }],
+        });
       } else {
-        navigation.navigate("UserHome");
+        // Navigate to the User Tab Navigation screen
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "UserTabs" }],
+        });
       }
     } catch (error) {
       setErrorMessage(error.response?.data?.message || "Login failed.");
@@ -42,10 +49,36 @@ const LoginScreen = () => {
       <Text style={{ fontSize: 24, textAlign: "center", marginBottom: 20 }}>Login</Text>
 
       {/* Email Input */}
-      <TextInput style={{ height: 50, borderColor: "#ccc", borderWidth: 1, borderRadius: 5, paddingLeft: 10, marginBottom: 16 }} placeholder="Email" keyboardType="email-address" value={formData.email} onChangeText={(value) => handleChange("email", value)} />
+      <TextInput
+        style={{
+          height: 50,
+          borderColor: "#ccc",
+          borderWidth: 1,
+          borderRadius: 5,
+          paddingLeft: 10,
+          marginBottom: 16,
+        }}
+        placeholder="Email"
+        keyboardType="email-address"
+        value={formData.email}
+        onChangeText={(value) => handleChange("email", value)}
+      />
 
       {/* Password Input */}
-      <TextInput style={{ height: 50, borderColor: "#ccc", borderWidth: 1, borderRadius: 5, paddingLeft: 10, marginBottom: 16 }} placeholder="Password" secureTextEntry value={formData.password} onChangeText={(value) => handleChange("password", value)} />
+      <TextInput
+        style={{
+          height: 50,
+          borderColor: "#ccc",
+          borderWidth: 1,
+          borderRadius: 5,
+          paddingLeft: 10,
+          marginBottom: 16,
+        }}
+        placeholder="Password"
+        secureTextEntry
+        value={formData.password}
+        onChangeText={(value) => handleChange("password", value)}
+      />
 
       <Button title="Login" mode="contained" loading={loading} onPress={handleLogin} style={{ marginBottom: 16 }} />
 

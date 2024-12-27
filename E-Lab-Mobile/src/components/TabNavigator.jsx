@@ -8,9 +8,9 @@ import { AuthContext } from "../contexts/AuthContext";
 const Tab = createBottomTabNavigator();
 // paneldeki sayfalar arası geçiş için kullanılacak
 const TabNavigator = () => {
-  const { user } = useContext(AuthContext);
+  const { role } = useContext(AuthContext);
 
-  const tabs = user.role === "Admin" ? adminTabs : userTabs;
+  const tabs = role === "Admin" ? adminTabs : userTabs;
 
   return (
     <Tab.Navigator
