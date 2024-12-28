@@ -7,7 +7,7 @@ import axiosInstance from "../utils/axiosSetup";
 import ManualApModal from "../modals/ManualApModal";
 import ManualCilvModal from "../modals/ManualCilvModal";
 import ManualOsModal from "../modals/ManualOsModal";
-import ManualTjpModal from "../modals/ManulaTjpModal";
+import ManualTjpModal from "../modals/ManualTjpModal";
 import ManualTubitakModal from "../modals/ManualTubitakModal";
 
 const AdminHome = () => {
