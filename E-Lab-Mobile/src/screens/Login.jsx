@@ -6,7 +6,7 @@ import { Snackbar } from "react-native-paper";
 
 const LoginScreen = () => {
   const [formData, setFormData] = useState({
-    email: "",
+    tckn: "",
     password: "",
   });
   const [loading, setLoading] = useState(false);
@@ -37,7 +37,7 @@ const LoginScreen = () => {
         });
       }
     } catch (error) {
-      setErrorMessage(error.response?.data?.message || "Login failed.");
+      setErrorMessage(error.response?.data?.message || "Giriş başarısız.");
       console.error("Error logging in:", error);
     } finally {
       setLoading(false);
@@ -58,10 +58,10 @@ const LoginScreen = () => {
           paddingLeft: 10,
           marginBottom: 16,
         }}
-        placeholder="Email"
-        keyboardType="email-address"
-        value={formData.email}
-        onChangeText={(value) => handleChange("email", value)}
+        placeholder="TC Kimlik No"
+        keyboardType="numeric"
+        value={formData.tckn}
+        onChangeText={(value) => handleChange("tckn", value)}
       />
 
       {/* Password Input */}
@@ -74,7 +74,7 @@ const LoginScreen = () => {
           paddingLeft: 10,
           marginBottom: 16,
         }}
-        placeholder="Password"
+        placeholder="Şifre"
         secureTextEntry
         value={formData.password}
         onChangeText={(value) => handleChange("password", value)}
@@ -84,9 +84,9 @@ const LoginScreen = () => {
 
       {/* Register Link */}
       <Text style={{ textAlign: "center" }}>
-        Don't have an account?{" "}
+        Hesabın yok mu?{" "}
         <Text style={{ color: "blue" }} onPress={() => navigation.navigate("Register")}>
-          Register here
+          Kayıt ol
         </Text>
       </Text>
 

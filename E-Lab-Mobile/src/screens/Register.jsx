@@ -9,7 +9,7 @@ const baseURL = Constants.expoConfig.extra.apiBaseUrl;
 const RegisterScreen = ({ navigation }) => {
   const [formData, setFormData] = useState({
     fullName: "",
-    email: "",
+    tckn: "",
     birthDate: "",
     password: "",
   });
@@ -25,11 +25,11 @@ const RegisterScreen = ({ navigation }) => {
     setLoading(true);
     try {
       const response = await axios.post(`${baseURL}/account/register`, formData);
-      setSuccessMessage("User registered successfully!");
+      setSuccessMessage("Kayıt işlemi başarılı!");
       console.log(response.data);
       navigation.navigate("Login");
     } catch (error) {
-      setErrorMessage(error.response?.data?.message || "Registration failed.");
+      setErrorMessage(error.response?.data?.message || "Kayıt başarısız.");
       console.error("Error registering user:", error);
     } finally {
       setLoading(false);
@@ -49,7 +49,7 @@ const RegisterScreen = ({ navigation }) => {
           paddingLeft: 10,
           marginBottom: 16,
         }}
-        placeholder="Full Name"
+        placeholder="Ad Soyad"
         value={formData.fullName}
         onChangeText={(value) => handleChange("fullName", value)}
       />
@@ -63,10 +63,10 @@ const RegisterScreen = ({ navigation }) => {
           paddingLeft: 10,
           marginBottom: 16,
         }}
-        placeholder="Email"
-        keyboardType="email-address"
-        value={formData.email}
-        onChangeText={(value) => handleChange("email", value)}
+        placeholder="TC Kimlik No"
+        keyboardType="numeric"
+        value={formData.tckn}
+        onChangeText={(value) => handleChange("tckn", value)}
       />
 
       <TextInput
@@ -78,7 +78,7 @@ const RegisterScreen = ({ navigation }) => {
           paddingLeft: 10,
           marginBottom: 16,
         }}
-        placeholder="Birth Date (YYYY-MM-DD)"
+        placeholder="Doğum Tarihi (YYYY-AA-GG)"
         value={formData.birthDate}
         onChangeText={(value) => handleChange("birthDate", value)}
       />
@@ -98,7 +98,7 @@ const RegisterScreen = ({ navigation }) => {
         onChangeText={(value) => handleChange("password", value)}
       />
 
-      <Button title={loading ? "Registering..." : "Register"} onPress={handleRegister} disabled={loading} />
+      <Button title={loading ? "Kaydolunuyor..." : "Kayıt ol"} onPress={handleRegister} disabled={loading} />
 
       <Snackbar visible={!!successMessage} onDismiss={() => setSuccessMessage("")} duration={Snackbar.DURATION_SHORT} style={{ backgroundColor: "green", marginBottom: 20 }}>
         {successMessage}

@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import Constants from "expo-constants";
 
@@ -12,6 +13,8 @@ export const AuthProvider = ({ children }) => {
   const [role, setRole] = useState(null);
   const [accessToken, setAccessToken] = useState(null);
   const [refreshToken, setRefreshToken] = useState(null);
+
+  const navigation = useNavigation();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -77,6 +80,11 @@ export const AuthProvider = ({ children }) => {
       setRefreshToken(null);
       setRole(null);
       setIsAuthenticated(false);
+
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Login" }], // Replace "Login" with your actual login screen route name
+      });
     } catch (error) {
       console.error("Logout failed:", error);
     }

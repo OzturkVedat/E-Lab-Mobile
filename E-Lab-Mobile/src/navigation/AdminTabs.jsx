@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 import AdminHome from "../screens/AdminHome";
 import AccountDetails from "../components/AccountDetails";
+import PatientsList from "../components/PatientsList";
 
 const AdminTabs = createBottomTabNavigator();
 
@@ -16,6 +17,13 @@ const AdminTabNavigator = () => (
         tabBarIcon: ({ color, size }) => (
           <Ionicons name="home" size={size} color={color} /> // Home icon
         ),
+      }}
+    />
+    <AdminTabs.Screen
+      name="PatientsList"
+      component={PatientsList}
+      options={{
+        tabBarIcon: ({ color, size }) => <Ionicons name="body" size={size} color={color} />,
       }}
     />
     <AdminTabs.Screen

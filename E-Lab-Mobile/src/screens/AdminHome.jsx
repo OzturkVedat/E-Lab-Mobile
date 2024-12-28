@@ -8,14 +8,11 @@ const AdminHome = () => {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        {/* Main content above the tab navigator */}
         <Card style={styles.card}>
           <Title>Welcome, Admin</Title>
           <Text style={styles.cardText}>Use the tabs below to navigate between the features of the admin panel.</Text>
         </Card>
       </View>
-
-      {/* Static TabNavigator at the bottom */}
     </View>
   );
 };
