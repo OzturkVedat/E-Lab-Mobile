@@ -48,13 +48,13 @@ const TestResults = ({ route }) => {
     try {
       const response = await axiosInstance.post("/admin/new-test-result", data);
       if (response.status === 200) {
-        setTestResults((prevResults) => [...prevResults, response.data]); // Add the new result to the list
-        setShowModal(false); // Close the modal
-        setSnackbarVisible(true); // Show the success snackbar
+        setTestResults((prevResults) => [...prevResults, response.data]);
+        setShowModal(false);
+        setSnackbarVisible(true);
       }
     } catch (err) {
       console.error("Error adding test result:", err);
-      setSnackbarVisible(true); // Show an error snackbar
+      setSnackbarVisible(true);
     }
   };
 
@@ -63,21 +63,14 @@ const TestResults = ({ route }) => {
       <View style={styles.buttonContainer}>
         <Button
           mode="text"
-          onPress={() => navigation.goBack()} // Navigate back
-          icon="arrow-left" // Icon for the back button
+          onPress={() => navigation.goBack()} 
+          icon="arrow-left"
           style={styles.backButton}
         >
           Geri
         </Button>
-        <Button
-          mode="contained"
-          onPress={() => setShowModal(true)}
-          style={styles.addButton}
-          icon={({ size, color }) => (
-            <Ionicons name="add-circle-outline" size={size} color={color} /> // Add icon here
-          )}
-        >
-          Yeni Test Sonucu Ekle
+        <Button mode="contained" onPress={() => setShowModal(true)} style={styles.addButton} icon={({ size, color }) => <Ionicons name="add-circle-outline" size={size} color={color} />}>
+          Hasta İçin Yeni Tahlil Ekle
         </Button>
       </View>
 
@@ -85,7 +78,7 @@ const TestResults = ({ route }) => {
         isVisible={showModal}
         onClose={() => setShowModal(false)}
         patientId={patientId}
-        onSubmit={handleNewTestResult} // Pass the submit handler
+        onSubmit={handleNewTestResult} 
       />
 
       {loading && (

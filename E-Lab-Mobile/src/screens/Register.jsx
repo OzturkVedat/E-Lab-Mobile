@@ -1,19 +1,26 @@
 import React, { useState } from "react";
-import { View, Text, TextInput } from "react-native";
+import { View, Text, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { StyleSheet } from "react-native";
-import { TextInput as PaperInput, Button as PaperButton, Snackbar } from "react-native-paper";
+import { TextInput as PaperInput, Button as PaperButton, Snackbar, RadioButton } from "react-native-paper";
 import axios from "axios";
 import Constants from "expo-constants";
 
 const baseURL = Constants.expoConfig.extra.apiBaseUrl;
 
 const RegisterScreen = () => {
+  const GenderEnum = {
+    Male: 0,
+    Female: 1,
+  };
+
+  // Default formData with numeric gender
   const [formData, setFormData] = useState({
     fullName: "",
     tckn: "",
     birthDate: "",
     password: "",
+    gender: GenderEnum.Male,
   });
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -45,12 +52,21 @@ const RegisterScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Kayıt Ol</Text>
-
       <PaperInput label="Ad Soyad" value={formData.fullName} onChangeText={(value) => handleChange("fullName", value)} style={styles.input} mode="outlined" />
       <PaperInput label="TC Kimlik No" value={formData.tckn} onChangeText={(value) => handleChange("tckn", value)} style={styles.input} keyboardType="numeric" mode="outlined" />
       <PaperInput label="Doğum Tarihi (YYYY-AA-GG)" value={formData.birthDate} onChangeText={(value) => handleChange("birthDate", value)} style={styles.input} mode="outlined" />
       <PaperInput label="Şifre" value={formData.password} onChangeText={(value) => handleChange("password", value)} style={styles.input} secureTextEntry mode="outlined" />
-
+      <Text style={styles.genderLabel}>Cinsiyet:</Text>
+      <RadioButton.Group onValueChange={(value) => handleChange("gender", value)} value={formData.gender}>
+        <View style={styles.radioRow}>
+          <RadioButton value={GenderEnum.Male} />
+          <Text style={styles.radioLabel}>Erkek</Text>
+        </View>
+        <View style={styles.radioRow}>
+          <RadioButton value={GenderEnum.Female} />
+          <Text style={styles.radioLabel}>Kız</Text>
+        </View>
+      </RadioButton.Group>
       <PaperButton mode="contained" loading={loading} onPress={handleRegister} style={styles.button}>
         {loading ? "Kaydolunuyor..." : "Kayıt ol"}
       </PaperButton>
@@ -88,6 +104,20 @@ const styles = StyleSheet.create({
   },
   button: {
     marginBottom: 16,
+  },
+  genderLabel: {
+    fontSize: 16,
+    marginBottom: 8,
+    color: "black",
+  },
+  radioRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  radioLabel: {
+    fontSize: 16,
+    marginLeft: 8,
   },
   textCenter: {
     textAlign: "center",

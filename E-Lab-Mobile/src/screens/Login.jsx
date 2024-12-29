@@ -30,7 +30,7 @@ const LoginScreen = ({ navigation }) => {
 
   return (
     <View style={{ flex: 1, justifyContent: "center", padding: 16, backgroundColor: "white" }}>
-      <Text style={{ fontSize: 24, textAlign: "center", marginBottom: 20, fontWeight: "bold" }}>Login</Text>
+      <Text style={{ fontSize: 24, textAlign: "center", marginBottom: 20, fontWeight: "bold" }}>E-Lab'e Giriş Yap</Text>
 
       <TextInput label="TC Kimlik No" value={formData.tckn} onChangeText={(value) => handleChange("tckn", value)} keyboardType="numeric" mode="outlined" style={{ marginBottom: 16 }} theme={{ colors: { primary: "#6200ee" } }} error={!!errorMessage} />
 
@@ -45,7 +45,7 @@ const LoginScreen = ({ navigation }) => {
       </HelperText>
 
       <Button mode="contained" loading={loading} onPress={handleLogin} style={{ marginBottom: 16 }} theme={{ colors: { primary: "#6200ee" } }}>
-        Login
+        Giriş Yap
       </Button>
 
       {/* Register Link */}
