@@ -1,10 +1,9 @@
 import React, { useState, useContext } from "react";
-import { View, Text, TextInput, Button } from "react-native";
+import { View, Text } from "react-native";
 import { AuthContext } from "../contexts/AuthContext";
-import { useNavigation } from "@react-navigation/native";
-import { Snackbar } from "react-native-paper";
+import { TextInput, Button, Snackbar, HelperText } from "react-native-paper"; // Import Paper components
 
-const LoginScreen = () => {
+const LoginScreen = ({ navigation }) => {
   const [formData, setFormData] = useState({
     tckn: "",
     password: "",
@@ -12,30 +11,15 @@ const LoginScreen = () => {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const { login, isAuthenticated, role } = useContext(AuthContext);
-  const navigation = useNavigation();
 
-  const handleChange = (name, value) => {
-    setFormData({ ...formData, [name]: value });
+  const handleChange = (type, value) => {
+    setFormData({ ...formData, [type]: value });
   };
 
   const handleLogin = async () => {
     setLoading(true);
     try {
-      await login(formData); // Send credentials to authContext
-
-      if (role === "Admin") {
-        // Navigate to the Admin Tab Navigation screen
-        navigation.reset({
-          index: 0,
-          routes: [{ name: "AdminTabs" }],
-        });
-      } else {
-        // Navigate to the User Tab Navigation screen
-        navigation.reset({
-          index: 0,
-          routes: [{ name: "UserTabs" }],
-        });
-      }
+      await login(formData);
     } catch (error) {
       setErrorMessage(error.response?.data?.message || "Giriş başarısız.");
       console.error("Error logging in:", error);
@@ -46,46 +30,28 @@ const LoginScreen = () => {
 
   return (
     <View style={{ flex: 1, justifyContent: "center", padding: 16, backgroundColor: "white" }}>
-      <Text style={{ fontSize: 24, textAlign: "center", marginBottom: 20 }}>Login</Text>
+      <Text style={{ fontSize: 24, textAlign: "center", marginBottom: 20, fontWeight: "bold" }}>Login</Text>
 
-      {/* Email Input */}
-      <TextInput
-        style={{
-          height: 50,
-          borderColor: "#ccc",
-          borderWidth: 1,
-          borderRadius: 5,
-          paddingLeft: 10,
-          marginBottom: 16,
-        }}
-        placeholder="TC Kimlik No"
-        keyboardType="numeric"
-        value={formData.tckn}
-        onChangeText={(value) => handleChange("tckn", value)}
-      />
+      <TextInput label="TC Kimlik No" value={formData.tckn} onChangeText={(value) => handleChange("tckn", value)} keyboardType="numeric" mode="outlined" style={{ marginBottom: 16 }} theme={{ colors: { primary: "#6200ee" } }} error={!!errorMessage} />
 
-      {/* Password Input */}
-      <TextInput
-        style={{
-          height: 50,
-          borderColor: "#ccc",
-          borderWidth: 1,
-          borderRadius: 5,
-          paddingLeft: 10,
-          marginBottom: 16,
-        }}
-        placeholder="Şifre"
-        secureTextEntry
-        value={formData.password}
-        onChangeText={(value) => handleChange("password", value)}
-      />
+      <HelperText type="error" visible={!!errorMessage}>
+        {errorMessage && errorMessage.includes("TC Kimlik No") && errorMessage}
+      </HelperText>
 
-      <Button title="Login" mode="contained" loading={loading} onPress={handleLogin} style={{ marginBottom: 16 }} />
+      <TextInput label="Şifre" value={formData.password} onChangeText={(value) => handleChange("password", value)} secureTextEntry mode="outlined" style={{ marginBottom: 16 }} theme={{ colors: { primary: "#6200ee" } }} error={!!errorMessage} />
+
+      <HelperText type="error" visible={!!errorMessage}>
+        {errorMessage && errorMessage.includes("Şifre") && errorMessage}
+      </HelperText>
+
+      <Button mode="contained" loading={loading} onPress={handleLogin} style={{ marginBottom: 16 }} theme={{ colors: { primary: "#6200ee" } }}>
+        Login
+      </Button>
 
       {/* Register Link */}
       <Text style={{ textAlign: "center" }}>
         Hesabın yok mu?{" "}
-        <Text style={{ color: "blue" }} onPress={() => navigation.navigate("Register")}>
+        <Text style={{ color: "#6200ee" }} onPress={() => navigation.navigate("Register")}>
           Kayıt ol
         </Text>
       </Text>

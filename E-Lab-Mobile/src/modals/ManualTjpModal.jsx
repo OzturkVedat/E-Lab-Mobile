@@ -1,8 +1,11 @@
 import React from "react";
-import { View, Text, Modal, StyleSheet, Button, ScrollView } from "react-native";
+import { View, ScrollView, StyleSheet, Dimensions } from "react-native";
+import { Modal, Button, Text, Paragraph } from "react-native-paper";
 import { MaterialIcons } from "react-native-vector-icons";
 
 const ManualTjpModal = ({ visible, onClose, result }) => {
+  const { height } = Dimensions.get("window");
+
   const getArrowIcon = (result) => {
     switch (result) {
       case "Dusuk":
@@ -31,26 +34,29 @@ const ManualTjpModal = ({ visible, onClose, result }) => {
   };
 
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <View style={styles.modalContainer}>
-        <Button title="Close" onPress={onClose} />
-        <Text style={styles.title}>Tjp Kılavuzu Sonuçları</Text>
+    <Modal visible={visible} onDismiss={onClose} contentContainerStyle={styles.modalContainer} style={{ height: height * 0.9 }}>
+      <Text style={styles.title}>Tjp Kılavuzu Sonuçları</Text>
 
-        {result?.igTjpRangesResults && result.igTjpRangesResults.length > 0 ? (
-          <ScrollView>
+      {result?.igTjpRangesResults && result.igTjpRangesResults.length > 0 ? (
+        <ScrollView>
+          <View style={styles.grid}>
             {result.igTjpRangesResults.map((rangeResult, index) => (
               <View key={index} style={styles.resultItem}>
                 <Text style={styles.resultTitle}>{getIgTypeString(rangeResult.igType)}</Text>
-                <Text>Geometrik Ortalama Sonucu: {getArrowIcon(rangeResult.gMResult)}</Text>
-                <Text>Min/Max Sonucu: {getArrowIcon(rangeResult.minMaxResult)}</Text>
-                <Text>Güven Aralığı Sonucu: {getArrowIcon(rangeResult.ciResult)}</Text>
+                <Paragraph>Geo.Ort.: {getArrowIcon(rangeResult.gmResult)}</Paragraph>
+                <Paragraph>Min/Max: {getArrowIcon(rangeResult.minMaxResult)}</Paragraph>
+                <Paragraph>G.Aralığı: {getArrowIcon(rangeResult.ciResult)}</Paragraph>
               </View>
             ))}
-          </ScrollView>
-        ) : (
-          <Text>Sonuç bulunamadı.</Text>
-        )}
-      </View>
+          </View>
+        </ScrollView>
+      ) : (
+        <Text>Sonuç bulunamadı.</Text>
+      )}
+
+      <Button mode="contained" onPress={onClose} style={styles.closeButton}>
+        Kapat
+      </Button>
     </Modal>
   );
 };
@@ -61,13 +67,22 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
+    backgroundColor: "white",
+    borderRadius: 10,
   },
   title: {
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 10,
   },
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
   resultItem: {
+    width: "48%", // Two items per row with some spacing
     marginBottom: 20,
     padding: 10,
     borderWidth: 1,
@@ -78,6 +93,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 8,
+  },
+  closeButton: {
+    marginTop: 20,
   },
 });
 

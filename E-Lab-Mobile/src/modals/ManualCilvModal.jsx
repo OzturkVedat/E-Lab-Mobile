@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, Modal, StyleSheet, Button } from "react-native";
+import { View, StyleSheet } from "react-native";
+import { Dialog, Paragraph, Button, Text } from "react-native-paper";
 import { MaterialIcons } from "react-native-vector-icons";
 
 const ManualCilvModal = ({ visible, onClose, result }) => {
@@ -17,32 +18,62 @@ const ManualCilvModal = ({ visible, onClose, result }) => {
   };
 
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <View style={styles.modalContainer}>
-        <Button title="Close" onPress={onClose} />
-        <Text style={styles.title}>Cilv Kılavuzu Sonuçları</Text>
-        {result?.igAResult && <Text>IgA: {getArrowIcon(result.igAResult)}</Text>}
-        {result?.igMResult && <Text>IgM: {getArrowIcon(result.igMResult)}</Text>}
-        {result?.igGResult && <Text>IgG: {getArrowIcon(result.igGResult)}</Text>}
-        {result?.igG1Result && <Text>IgG1: {getArrowIcon(result.igG1Result)}</Text>}
-        {result?.igG2Result && <Text>IgG2: {getArrowIcon(result.igG2Result)}</Text>}
-        {result?.igG3Result && <Text>IgG3: {getArrowIcon(result.igG3Result)}</Text>}
-        {result?.igG4Result && <Text>IgG4: {getArrowIcon(result.igG4Result)}</Text>}
-      </View>
-    </Modal>
+    <Dialog visible={visible} onDismiss={onClose}>
+      <Dialog.Title>Cilv Kılavuzu Sonuçları</Dialog.Title>
+      <Dialog.Content>
+        <View style={styles.resultContainer}>
+          {result?.igAResult && (
+            <View style={styles.resultItem}>
+              <Text>IgA: {getArrowIcon(result.igAResult)}</Text>
+            </View>
+          )}
+          {result?.igMResult && (
+            <View style={styles.resultItem}>
+              <Text>IgM: {getArrowIcon(result.igMResult)}</Text>
+            </View>
+          )}
+          {result?.igGResult && (
+            <View style={styles.resultItem}>
+              <Text>IgG: {getArrowIcon(result.igGResult)}</Text>
+            </View>
+          )}
+          {result?.igG1Result && (
+            <View style={styles.resultItem}>
+              <Text>IgG1: {getArrowIcon(result.igG1Result)}</Text>
+            </View>
+          )}
+          {result?.igG2Result && (
+            <View style={styles.resultItem}>
+              <Text>IgG2: {getArrowIcon(result.igG2Result)}</Text>
+            </View>
+          )}
+          {result?.igG3Result && (
+            <View style={styles.resultItem}>
+              <Text>IgG3: {getArrowIcon(result.igG3Result)}</Text>
+            </View>
+          )}
+          {result?.igG4Result && (
+            <View style={styles.resultItem}>
+              <Text>IgG4: {getArrowIcon(result.igG4Result)}</Text>
+            </View>
+          )}
+        </View>
+      </Dialog.Content>
+      <Dialog.Actions>
+        <Button onPress={onClose}>Kapat</Button>
+      </Dialog.Actions>
+    </Dialog>
   );
 };
 
 const styles = StyleSheet.create({
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
+  resultContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
   },
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
+  resultItem: {
+    width: "48%", // Allows for two columns with some spacing
     marginBottom: 10,
   },
 });

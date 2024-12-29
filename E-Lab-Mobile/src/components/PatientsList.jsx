@@ -1,26 +1,28 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
-import { Card, Title, Paragraph, TextInput, Button } from "react-native-paper";
-import { FlatList } from "react-native";
+import { View, FlatList, StyleSheet } from "react-native";
+import { TextInput, Button, Card, Title, Paragraph, ActivityIndicator, Snackbar } from "react-native-paper";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import debounce from "lodash.debounce";
 import { useNavigation } from "@react-navigation/native";
-
 import axiosInstance from "../utils/axiosSetup";
 
 const PatientsList = () => {
   const [patients, setPatients] = useState([]);
+  const [searchResults, setSearchResults] = useState([]); // New state for search results
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
 
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets(); // Get safe area insets
 
   useEffect(() => {
     const fetchPatients = async () => {
       try {
         const response = await axiosInstance.get("/admin/all-patient-details");
         if (response.status === 200 && response.data) {
-          setPatients(response.data.data);
+          setPatients(response.data.data); // Store full list of patients
         } else {
           setError("Hasta bilgileri getirilemedi.");
         }
@@ -35,21 +37,23 @@ const PatientsList = () => {
   }, []);
 
   const handleSearch = async () => {
-    if (!searchQuery.trim() || searchQuery.length < 2) {
-      setError("Lütfen en az iki karakter uzunluğunda bir isim girin.");
-      setPatients([]);
+    if (!searchQuery.trim() || searchQuery.length < 1) {
+      setError("Lütfengeçerli bir isim girin.");
+      setSearchResults([]); // Reset search results
       return;
     }
 
     setLoading(true);
     setError("");
+    setSearchResults([]); // Clear previous search results
 
     try {
       const response = await axiosInstance.get(`/admin/patient-by-fullname/${searchQuery}`);
       if (response.status === 200 && response.data) {
-        setPatients(response.data.data);
+        setSearchResults(response.data.data); // Store search results
       } else {
         setError("Sonuç bulunamadı.");
+        setSearchResults([]); // Clear search results if no match
       }
     } catch (err) {
       console.error("Error searching patients:", err);
@@ -61,9 +65,10 @@ const PatientsList = () => {
 
   const debouncedSearch = useCallback(debounce(handleSearch, 500), []);
 
+  const dataToDisplay = searchQuery.trim() && searchResults.length > 0 ? searchResults : patients; // Display search results or all patients
+
   return (
-    <View style={styles.container}>
-      {/* Search Bar */}
+    <View style={[styles.container, { paddingTop: 70 }]}>
       <TextInput
         style={styles.searchInput}
         placeholder="Ad Soyad ile arama yapın"
@@ -72,39 +77,46 @@ const PatientsList = () => {
           setSearchQuery(text);
           debouncedSearch(text);
         }}
+        mode="outlined"
       />
-      <Button title="Ara" onPress={handleSearch} mode="contained" style={styles.searchButton} />
-
+      <Button onPress={handleSearch} mode="contained" style={styles.searchButton}>
+        Ara
+      </Button>
       {/* Loading Indicator */}
       {loading && (
         <View style={styles.center}>
           <ActivityIndicator size="large" color="#6200ee" />
-          <Text>Yükleniyor...</Text>
         </View>
       )}
-
-      {!loading && patients.length === 0 && !error && (
-        <View style={styles.center}>
-          <Text>Sonuç bulunamadı.</Text>
-        </View>
-      )}
-
       {/* Error Message */}
       {error && !loading && (
+        <Snackbar
+          visible={snackbarVisible}
+          onDismiss={() => setSnackbarVisible(false)}
+          action={{
+            label: "OK",
+            onPress: () => setSnackbarVisible(false),
+          }}
+        >
+          {error}
+        </Snackbar>
+      )}
+      {/* No Results */}
+      {!loading && dataToDisplay.length === 0 && !error && (
         <View style={styles.center}>
-          <Text style={styles.errorText}>{error}</Text>
+          <Paragraph>Sonuç bulunamadı.</Paragraph>
         </View>
       )}
-
-      {!loading && !error && patients.length > 0 && (
+      {/* Patient List */}
+      {!loading && !error && dataToDisplay.length > 0 && (
         <FlatList
-          data={patients}
+          data={dataToDisplay}
           keyExtractor={(item) => item.patientId.toString()}
           renderItem={({ item }) => (
             <Card style={styles.card} onPress={() => navigation.navigate("TestResults", { patientId: item.patientId, patientName: item.fullName })}>
-              <Title style={styles.title}>{item.fullName}</Title>
+              <Title>{item.fullName}</Title>
               <Paragraph>TCKN: {item.tckn}</Paragraph>
-              <Paragraph>Cinsiyet: {item.gender === 0 ? "Erkek" : "Kız"}</Paragraph>
+              <Paragraph>Cinsiyet: {item.gender === 0 ? "Erkek" : "Kadın"}</Paragraph>
             </Card>
           )}
           contentContainerStyle={styles.listContainer}
@@ -117,7 +129,7 @@ const PatientsList = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    paddingHorizontal: 16,
     backgroundColor: "#f8f8f8",
   },
   searchInput: {
@@ -126,7 +138,6 @@ const styles = StyleSheet.create({
   },
   searchButton: {
     marginBottom: 16,
-    backgroundColor: "#add8ed",
   },
   center: {
     flex: 1,
@@ -144,15 +155,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     elevation: 3,
   },
-  title: {
-    fontSize: 18,
-    marginBottom: 8,
-  },
-  errorText: {
-    color: "red",
-    fontSize: 16,
-    textAlign: "center",
-    marginTop: 16,
-  },
 });
+
 export default PatientsList;

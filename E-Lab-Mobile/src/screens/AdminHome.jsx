@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { View, ScrollView, Text, TextInput, Button, StyleSheet, Alert } from "react-native";
-import { Card, Title, Paragraph } from "react-native-paper";
+import { View, ScrollView, Text, StyleSheet, Alert, SafeAreaView } from "react-native";
+import { TextInput, Button, Card, Title, Portal } from "react-native-paper";
 
 import axiosInstance from "../utils/axiosSetup";
 
@@ -58,6 +58,9 @@ const AdminHome = () => {
   };
 
   const handleSubmit = async () => {
+    if ([igA, igM, igG, igG1, igG2, igG3, igG4].some((value) => value && parseFloat(value) < 0)) {
+      return Alert.alert("Hata!", "Negatif değer giremezsiniz.");
+    }
     const payload = {
       AgeInMonths: parseInt(ageInMonths, 10),
       IgA: igA ? parseFloat(igA) : null,
@@ -72,6 +75,7 @@ const AdminHome = () => {
     try {
       const response = await axiosInstance.post("/admin/check-manual", payload);
       if (response.status === 200 && response.data) {
+        Alert.alert("Sonuçlar bulundu!", "Kılavuzlara tıklayınız.");
         setResult(response.data.data);
       } else {
         setResult(null);
@@ -85,52 +89,72 @@ const AdminHome = () => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <View style={styles.container}>
-        <View style={styles.content}>
-          <Card style={styles.card}>
-            <Title>Kılavuzlarda Ara</Title>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.container}>
+          <View style={styles.content}>
+            <Card style={styles.card}>
+              <Title style={styles.title}>Kılavuzlarda Ara</Title>
 
-            {/* Form inputs */}
-            <TextInput style={styles.input} placeholder="Yaş (ay)" value={ageInMonths} onChangeText={setAgeInMonths} keyboardType="numeric" />
-            <TextInput style={styles.input} placeholder="IgA (mg/dL)" value={igA} onChangeText={setIgA} keyboardType="numeric" />
-            <TextInput style={styles.input} placeholder="IgM (mg/dL)" value={igM} onChangeText={setIgM} keyboardType="numeric" />
-            <TextInput style={styles.input} placeholder="IgG (mg/dL)" value={igG} onChangeText={setIgG} keyboardType="numeric" />
-            <TextInput style={styles.input} placeholder="IgG1 (mg/dL)" value={igG1} onChangeText={setIgG1} keyboardType="numeric" />
-            <TextInput style={styles.input} placeholder="IgG2 (mg/dL)" value={igG2} onChangeText={setIgG2} keyboardType="numeric" />
-            <TextInput style={styles.input} placeholder="IgG3 (mg/dL)" value={igG3} onChangeText={setIgG3} keyboardType="numeric" />
-            <TextInput style={styles.input} placeholder="IgG4 (mg/dL)" value={igG4} onChangeText={setIgG4} keyboardType="numeric" />
+              <TextInput label="Yaş (ay)" value={ageInMonths} onChangeText={setAgeInMonths} keyboardType="numeric" style={styles.input} />
+              <TextInput label="IgA (mg/dL)" value={igA} onChangeText={setIgA} keyboardType="numeric" style={styles.input} />
+              <TextInput label="IgM (mg/dL)" value={igM} onChangeText={setIgM} keyboardType="numeric" style={styles.input} />
+              <TextInput label="IgG (mg/dL)" value={igG} onChangeText={setIgG} keyboardType="numeric" style={styles.input} />
+              <TextInput label="IgG1 (mg/dL)" value={igG1} onChangeText={setIgG1} keyboardType="numeric" style={styles.input} />
+              <TextInput label="IgG2 (mg/dL)" value={igG2} onChangeText={setIgG2} keyboardType="numeric" style={styles.input} />
+              <TextInput label="IgG3 (mg/dL)" value={igG3} onChangeText={setIgG3} keyboardType="numeric" style={styles.input} />
+              <TextInput label="IgG4 (mg/dL)" value={igG4} onChangeText={setIgG4} keyboardType="numeric" style={styles.input} />
 
-            {/* Submit Button */}
-            <Button title="Sonuçları Getir" onPress={handleSubmit} />
+              <Button mode="contained" onPress={handleSubmit} style={styles.button}>
+                Sonuçları Getir
+              </Button>
 
-            {result && (
-              <View style={styles.result}>
-                <Text>Sonuçlar:</Text>
-                <Button title="Ap Kılavuzu Sonuçları" onPress={() => openModal("manualAp")} />
-                <Button title="Cilv Kılavuzu Sonuçları" onPress={() => openModal("manualCilv")} />
-                <Button title="Os Kılavuzu Sonuçları" onPress={() => openModal("manualOs")} />
-                <Button title="Tjp Kılavuzu Sonuçları" onPress={() => openModal("manualTjp")} />
-                <Button title="Tubitak Kılavuzu Sonuçları" onPress={() => openModal("manualTubitak")} />
-              </View>
-            )}
-          </Card>
+              {result && (
+                <View style={styles.result}>
+                  <Button mode="outlined" onPress={() => openModal("manualAp")}>
+                    Ap Kılavuzu Sonuçları
+                  </Button>
+                  <Button mode="outlined" onPress={() => openModal("manualCilv")}>
+                    Cilv Kılavuzu Sonuçları
+                  </Button>
+                  <Button mode="outlined" onPress={() => openModal("manualOs")}>
+                    Os Kılavuzu Sonuçları
+                  </Button>
+                  <Button mode="outlined" onPress={() => openModal("manualTjp")}>
+                    Tjp Kılavuzu Sonuçları
+                  </Button>
+                  <Button mode="outlined" onPress={() => openModal("manualTubitak")}>
+                    Tubitak Kılavuzu Sonuçları
+                  </Button>
+                </View>
+              )}
+            </Card>
+          </View>
+
+          {/* Modals for different result types */}
+          <Portal>
+            {isManualApVisible && <ManualApModal visible={isManualApVisible} onClose={closeModal} result={result?.manualApResults} />}
+            {isManualCilvVisible && <ManualCilvModal visible={isManualCilvVisible} onClose={closeModal} result={result?.manualCilvResults} />}
+            {isManualOsVisible && <ManualOsModal visible={isManualOsVisible} onClose={closeModal} result={result?.manualOsResults} />}
+            {isManualTjpVisible && <ManualTjpModal visible={isManualTjpVisible} onClose={closeModal} result={result?.manualTjpResults} />}
+            {isManualTubitakVisible && <ManualTubitakModal visible={isManualTubitakVisible} onClose={closeModal} result={result?.manualTubitakResults} />}
+          </Portal>
         </View>
-        {/* Modals */}
-        {isManualApVisible && <ManualApModal visible={isManualApVisible} onClose={closeModal} result={result?.manualApResults} />}
-        {isManualCilvVisible && <ManualCilvModal visible={isManualCilvVisible} onClose={closeModal} result={result?.manualCilvResults} />}
-        {isManualOsVisible && <ManualOsModal visible={isManualOsVisible} onClose={closeModal} result={result?.manualOsResults} />}
-        {isManualTjpVisible && <ManualTjpModal visible={isManualTjpVisible} onClose={closeModal} result={result?.manualTjpResults} />}
-        {isManualTubitakVisible && <ManualTubitakModal visible={isManualTubitakVisible} onClose={closeModal} result={result?.manualTubitakResults} />}
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#fff",
+    marginTop: 40,
+  },
   container: {
     flex: 1,
     justifyContent: "center",
+    padding: 16,
   },
   content: {
     flex: 1,
@@ -138,18 +162,23 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   card: {
-    width: "90%",
+    width: "100%",
     padding: 16,
+    marginBottom: 20,
   },
   input: {
-    width: "100%",
-    padding: 8,
     marginBottom: 12,
-    borderWidth: 1,
-    borderRadius: 4,
+  },
+  title: {
+    padding: 15,
+  },
+  button: {
+    marginTop: 12,
   },
   result: {
     marginTop: 20,
+    paddingTop: 10,
   },
 });
+
 export default AdminHome;

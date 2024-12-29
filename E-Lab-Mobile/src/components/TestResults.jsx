@@ -1,15 +1,22 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
-import { Card, Title, Paragraph } from "react-native-paper";
-import axiosInstance from "../utils/axiosSetup";
+import { View, ActivityIndicator, StyleSheet } from "react-native";
+import { Card, Paragraph, Button, Text, Appbar, Snackbar } from "react-native-paper";
 import { ScrollView } from "react-native-gesture-handler";
+import { useNavigation } from "@react-navigation/native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import axiosInstance from "../utils/axiosSetup";
+import NewTestResult from "../modals/NewTestResult";
+import { Ionicons } from "@expo/vector-icons"; // Importing Ionicons for the icon
 
 const TestResults = ({ route }) => {
   const [testResults, setTestResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
 
   const { patientId, patientName } = route?.params || {};
+  const navigation = useNavigation();
 
   useEffect(() => {
     if (!patientId) {
@@ -37,9 +44,50 @@ const TestResults = ({ route }) => {
     fetchTestResults();
   }, [patientId]);
 
+  const handleNewTestResult = async (data) => {
+    try {
+      const response = await axiosInstance.post("/admin/new-test-result", data);
+      if (response.status === 200) {
+        setTestResults((prevResults) => [...prevResults, response.data]); // Add the new result to the list
+        setShowModal(false); // Close the modal
+        setSnackbarVisible(true); // Show the success snackbar
+      }
+    } catch (err) {
+      console.error("Error adding test result:", err);
+      setSnackbarVisible(true); // Show an error snackbar
+    }
+  };
+
   return (
-    <View style={styles.container}>
-      {/* Loading Indicator */}
+    <SafeAreaView style={styles.container}>
+      <View style={styles.buttonContainer}>
+        <Button
+          mode="text"
+          onPress={() => navigation.goBack()} // Navigate back
+          icon="arrow-left" // Icon for the back button
+          style={styles.backButton}
+        >
+          Geri
+        </Button>
+        <Button
+          mode="contained"
+          onPress={() => setShowModal(true)}
+          style={styles.addButton}
+          icon={({ size, color }) => (
+            <Ionicons name="add-circle-outline" size={size} color={color} /> // Add icon here
+          )}
+        >
+          Yeni Test Sonucu Ekle
+        </Button>
+      </View>
+
+      <NewTestResult
+        isVisible={showModal}
+        onClose={() => setShowModal(false)}
+        patientId={patientId}
+        onSubmit={handleNewTestResult} // Pass the submit handler
+      />
+
       {loading && (
         <View style={styles.center}>
           <ActivityIndicator size="large" color="#6200ee" />
@@ -47,7 +95,6 @@ const TestResults = ({ route }) => {
         </View>
       )}
 
-      {/* Error Message */}
       {!loading && error && (
         <View style={styles.center}>
           <Text style={styles.errorText}>{error}</Text>
@@ -56,11 +103,9 @@ const TestResults = ({ route }) => {
 
       {!loading && !error && testResults.length > 0 && (
         <ScrollView>
-          {/* Displaying the header only once */}
-          <Text style={styles.headerText}>{patientName} Tahlil Sonuçları</Text>
-
+          <Text style={styles.headerText}>{patientName === null ? "Geçmiş" : patientName} Tahlil Sonuçları</Text>
           {testResults.map((result) => (
-            <Card key={result.id} style={styles.card}>
+            <Card key={result.id} style={styles.card} onPress={() => navigation.navigate("ResultDetails", { testResultId: result.id })}>
               <Card.Content>
                 {result.igA !== null && <Paragraph>IgA: {result.igA}</Paragraph>}
                 {result.igM !== null && <Paragraph>IgM: {result.igM}</Paragraph>}
@@ -76,25 +121,42 @@ const TestResults = ({ route }) => {
         </ScrollView>
       )}
 
-      {/* No Results Message */}
       {!loading && testResults.length === 0 && !error && (
         <View style={styles.center}>
           <Text>Test sonucu bulunamadı.</Text>
         </View>
       )}
-    </View>
+
+      <Snackbar
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        action={{
+          label: "Kapat",
+          onPress: () => setSnackbarVisible(false),
+        }}
+      >
+        {error ? "Test sonucu eklenemedi." : "Test sonucu başarıyla eklendi."}
+      </Snackbar>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
     backgroundColor: "#f8f8f8",
+    marginTop: 40,
+  },
+  buttonContainer: {
+    padding: 16,
+    alignItems: "center",
+  },
+  addButton: {
+    width: "100%",
+    borderRadius: 8,
   },
   card: {
     marginBottom: 16,
-    padding: 16,
     backgroundColor: "white",
     borderRadius: 8,
     elevation: 3,
@@ -115,6 +177,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 20,
     textAlign: "center",
+  },
+  backButton: {
+    marginBottom: 20,
+    alignSelf: "flex-start",
   },
 });
 

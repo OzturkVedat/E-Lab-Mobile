@@ -9,14 +9,19 @@ import PatientsList from "../components/PatientsList";
 const AdminTabs = createBottomTabNavigator();
 
 const AdminTabNavigator = () => (
-  <AdminTabs.Navigator>
+  <AdminTabs.Navigator
+    screenOptions={{
+      tabBarActiveTintColor: "purple",
+      tabBarInactiveTintColor: "gray",
+    }}
+  >
     <AdminTabs.Screen
       name="AdminHome"
       component={AdminHome}
       options={{
-        tabBarIcon: ({ color, size }) => (
-          <Ionicons name="home" size={size} color={color} /> // Home icon
-        ),
+        tabBarIcon: ({ color, size }) => <Ionicons name="menu" size={size} color={color} />,
+        tabBarLabel: "Kılavuz",
+        headerShown: false,
       }}
     />
     <AdminTabs.Screen
@@ -24,15 +29,17 @@ const AdminTabNavigator = () => (
       component={PatientsList}
       options={{
         tabBarIcon: ({ color, size }) => <Ionicons name="body" size={size} color={color} />,
+        tabBarLabel: "Hastalar",
+        headerShown: false,
       }}
     />
     <AdminTabs.Screen
       name="AdminAccount"
       component={AccountDetails}
       options={{
-        tabBarIcon: ({ color, size }) => (
-          <Ionicons name="settings" size={size} color={color} /> // Settings icon
-        ),
+        tabBarIcon: ({ color, size }) => <Ionicons name="settings" size={size} color={color} />,
+        tabBarLabel: "Hesap",
+        headerShown: false,
       }}
     />
   </AdminTabs.Navigator>

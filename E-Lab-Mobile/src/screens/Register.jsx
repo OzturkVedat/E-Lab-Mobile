@@ -1,12 +1,14 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Button } from "react-native";
-import { Snackbar } from "react-native-paper";
+import { View, Text, TextInput } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { StyleSheet } from "react-native";
+import { TextInput as PaperInput, Button as PaperButton, Snackbar } from "react-native-paper";
 import axios from "axios";
 import Constants from "expo-constants";
 
 const baseURL = Constants.expoConfig.extra.apiBaseUrl;
 
-const RegisterScreen = ({ navigation }) => {
+const RegisterScreen = () => {
   const [formData, setFormData] = useState({
     fullName: "",
     tckn: "",
@@ -17,17 +19,21 @@ const RegisterScreen = ({ navigation }) => {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  const handleChange = (name, value) => {
-    setFormData({ ...formData, [name]: value });
+  const navigation = useNavigation();
+
+  const handleChange = (type, value) => {
+    setFormData({ ...formData, [type]: value });
   };
 
   const handleRegister = async () => {
     setLoading(true);
     try {
-      const response = await axios.post(`${baseURL}/account/register`, formData);
-      setSuccessMessage("Kayıt işlemi başarılı!");
-      console.log(response.data);
-      navigation.navigate("Login");
+      await axios.post(`${baseURL}/account/register`, formData);
+      Alert.alert("Başarılı", "Kayıt oldunuz.");
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Login" }],
+      });
     } catch (error) {
       setErrorMessage(error.response?.data?.message || "Kayıt başarısız.");
       console.error("Error registering user:", error);
@@ -37,85 +43,67 @@ const RegisterScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={{ flex: 1, justifyContent: "center", padding: 16, backgroundColor: "white" }}>
-      <Text style={{ fontSize: 24, textAlign: "center", marginBottom: 20 }}>Register</Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Kayıt Ol</Text>
 
-      <TextInput
-        style={{
-          height: 50,
-          borderColor: "#ccc",
-          borderWidth: 1,
-          borderRadius: 5,
-          paddingLeft: 10,
-          marginBottom: 16,
-        }}
-        placeholder="Ad Soyad"
-        value={formData.fullName}
-        onChangeText={(value) => handleChange("fullName", value)}
-      />
+      <PaperInput label="Ad Soyad" value={formData.fullName} onChangeText={(value) => handleChange("fullName", value)} style={styles.input} mode="outlined" />
+      <PaperInput label="TC Kimlik No" value={formData.tckn} onChangeText={(value) => handleChange("tckn", value)} style={styles.input} keyboardType="numeric" mode="outlined" />
+      <PaperInput label="Doğum Tarihi (YYYY-AA-GG)" value={formData.birthDate} onChangeText={(value) => handleChange("birthDate", value)} style={styles.input} mode="outlined" />
+      <PaperInput label="Şifre" value={formData.password} onChangeText={(value) => handleChange("password", value)} style={styles.input} secureTextEntry mode="outlined" />
 
-      <TextInput
-        style={{
-          height: 50,
-          borderColor: "#ccc",
-          borderWidth: 1,
-          borderRadius: 5,
-          paddingLeft: 10,
-          marginBottom: 16,
-        }}
-        placeholder="TC Kimlik No"
-        keyboardType="numeric"
-        value={formData.tckn}
-        onChangeText={(value) => handleChange("tckn", value)}
-      />
-
-      <TextInput
-        style={{
-          height: 50,
-          borderColor: "#ccc",
-          borderWidth: 1,
-          borderRadius: 5,
-          paddingLeft: 10,
-          marginBottom: 16,
-        }}
-        placeholder="Doğum Tarihi (YYYY-AA-GG)"
-        value={formData.birthDate}
-        onChangeText={(value) => handleChange("birthDate", value)}
-      />
-
-      <TextInput
-        style={{
-          height: 50,
-          borderColor: "#ccc",
-          borderWidth: 1,
-          borderRadius: 5,
-          paddingLeft: 10,
-          marginBottom: 16,
-        }}
-        placeholder="Password"
-        secureTextEntry
-        value={formData.password}
-        onChangeText={(value) => handleChange("password", value)}
-      />
-
-      <Button title={loading ? "Kaydolunuyor..." : "Kayıt ol"} onPress={handleRegister} disabled={loading} />
-
-      <Snackbar visible={!!successMessage} onDismiss={() => setSuccessMessage("")} duration={Snackbar.DURATION_SHORT} style={{ backgroundColor: "green", marginBottom: 20 }}>
+      <PaperButton mode="contained" loading={loading} onPress={handleRegister} style={styles.button}>
+        {loading ? "Kaydolunuyor..." : "Kayıt ol"}
+      </PaperButton>
+      <Snackbar visible={!!successMessage} onDismiss={() => setSuccessMessage("")} duration={Snackbar.DURATION_SHORT} style={styles.successSnackbar}>
         {successMessage}
       </Snackbar>
-
-      <Snackbar visible={!!errorMessage} onDismiss={() => setErrorMessage("")} duration={Snackbar.DURATION_SHORT} style={{ backgroundColor: "red", marginBottom: 20 }}>
+      <Snackbar visible={!!errorMessage} onDismiss={() => setErrorMessage("")} duration={Snackbar.DURATION_SHORT} style={styles.errorSnackbar}>
         {errorMessage}
       </Snackbar>
-
-      <Text style={{ textAlign: "center", marginTop: 16 }}>
+      <Text style={styles.textCenter}>
         Hesabın zaten var mı?{" "}
-        <Text style={{ color: "blue" }} onPress={() => navigation.navigate("Login")}>
+        <Text style={styles.linkText} onPress={() => navigation.navigate("Login")}>
           Giriş yap
         </Text>
       </Text>
     </View>
   );
 };
+
+// Styles
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    padding: 16,
+    backgroundColor: "white",
+  },
+  title: {
+    fontSize: 24,
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  input: {
+    marginBottom: 16,
+  },
+  button: {
+    marginBottom: 16,
+  },
+  textCenter: {
+    textAlign: "center",
+    marginTop: 16,
+  },
+  linkText: {
+    color: "blue",
+  },
+  successSnackbar: {
+    backgroundColor: "green",
+    marginBottom: 20,
+  },
+  errorSnackbar: {
+    backgroundColor: "red",
+    marginBottom: 20,
+  },
+});
 
 export default RegisterScreen;

@@ -54,8 +54,17 @@ export const AuthProvider = ({ children }) => {
         setAccessToken(accessToken);
         setRefreshToken(refreshToken);
         setIsAuthenticated(true);
-
-        return response;
+        if (role === "Admin") {
+          navigation.reset({
+            index: 0,
+            routes: [{ name: "AdminTabs" }],
+          });
+        } else {
+          navigation.reset({
+            index: 0,
+            routes: [{ name: "UserTabs" }],
+          });
+        }
       } else {
         console.error("Unexpected response structure:", response);
       }

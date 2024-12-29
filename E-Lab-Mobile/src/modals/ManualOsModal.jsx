@@ -1,6 +1,7 @@
 import React from "react";
-import { View, Text, Modal, StyleSheet, Button, ScrollView } from "react-native";
-import { MaterialIcons } from "react-native-vector-icons";
+import { StyleSheet, View } from "react-native";
+import { Dialog, Paragraph, Button, Text, Card } from "react-native-paper";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 
 const ManualOsModal = ({ visible, onClose, result }) => {
   const getArrowIcon = (result) => {
@@ -31,51 +32,50 @@ const ManualOsModal = ({ visible, onClose, result }) => {
   };
 
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <View style={styles.modalContainer}>
-        <Button title="Close" onPress={onClose} />
-        <Text style={styles.title}>Os Kılavuzu Sonuçları</Text>
-
+    <Dialog visible={visible} onDismiss={onClose}>
+      <Dialog.Title>Os Kılavuzu Sonuçları</Dialog.Title>
+      <Dialog.Content>
         {result?.igOsRangesResults && result.igOsRangesResults.length > 0 ? (
-          <ScrollView>
-            {result.igOsRangesResults.map((rangeResult, index) => (
-              <View key={index} style={styles.resultItem}>
+          result.igOsRangesResults.map((rangeResult, index) => (
+            <Card key={index} style={styles.card}>
+              <Card.Content>
                 <Text style={styles.resultTitle}>{getIgTypeString(rangeResult.igType)}</Text>
-                <Text>Aritmetik Ortalama Sonucu: {getArrowIcon(rangeResult.arithMeanResult)}</Text>
-                <Text>Min/Max Sonucu: {getArrowIcon(rangeResult.minMaxResult)}</Text>
-              </View>
-            ))}
-          </ScrollView>
+                <View style={styles.arrowIconContainer}>
+                  <Text>Aritmetik Ort.Sonucu:</Text>
+                  {getArrowIcon(rangeResult.arithMeanResult)}
+                </View>
+                <View style={styles.arrowIconContainer}>
+                  <Text>Min/Max Sonucu:</Text>
+                  {getArrowIcon(rangeResult.minMaxResult)}
+                </View>
+              </Card.Content>
+            </Card>
+          ))
         ) : (
-          <Text>Sonuç bulunamadı.</Text>
+          <Paragraph>Sonuç bulunamadı.</Paragraph>
         )}
-      </View>
-    </Modal>
+      </Dialog.Content>
+      <Dialog.Actions>
+        <Button onPress={onClose}>Kapat</Button>
+      </Dialog.Actions>
+    </Dialog>
   );
 };
 
 const styles = StyleSheet.create({
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
-  resultItem: {
-    marginBottom: 20,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 5,
+  card: {
+    marginBottom: 12,
+    borderRadius: 8,
+    elevation: 2,
   },
   resultTitle: {
     fontSize: 16,
     fontWeight: "bold",
+    marginBottom: 8,
+  },
+  arrowIconContainer: {
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 8,
   },
 });

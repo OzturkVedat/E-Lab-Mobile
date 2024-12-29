@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useContext } from "react";
-import { View, Text, ActivityIndicator, StyleSheet, Modal, TextInput, Button, Alert, Dimensions, ScrollView } from "react-native";
-import { Card, Title, Paragraph } from "react-native-paper";
+import { View, Text, StyleSheet, Dimensions, Alert, ActivityIndicator } from "react-native";
+import { Card, Title, Paragraph, Button, TextInput, Dialog, Portal } from "react-native-paper";
 
-import axiosInstance from "../utils/axiosSetup"; // API'ye bununla istek yollanacak
+import axiosInstance from "../utils/axiosSetup";
 import { AuthContext } from "../contexts/AuthContext";
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 
 const AccountDetails = () => {
   const [userDetails, setUserDetails] = useState(null);
@@ -13,10 +13,8 @@ const AccountDetails = () => {
   const [error, setError] = useState("");
   const [updateModalVisible, setUpdateModalVisible] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-  const [formData, setFormData] = useState({
-    fullName: "",
-    birthDate: "",
-  });
+  const [logoutModalVisible, setLogoutModalVisible] = useState(false);
+  const [formData, setFormData] = useState({ fullName: "", birthDate: "" });
   const { logout } = useContext(AuthContext);
 
   useEffect(() => {
@@ -31,7 +29,7 @@ const AccountDetails = () => {
           });
         }
       } catch (err) {
-        setError(err.response?.data?.message || "Kullanıcı bilgileri alınırken bir hata oluştu.");
+        setError(err.response?.data?.message || "Kullanıcı bilgileri alınırken hata oluştu.");
         console.error("Error fetching user details: ", err);
       } finally {
         setLoading(false);
@@ -39,6 +37,16 @@ const AccountDetails = () => {
     };
     fetchUserDetails();
   }, []);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      Alert.alert("Başarılı", "Çıkış yaptınız.");
+    } catch (err) {
+      console.error("Error logging out: ", err);
+      Alert.alert("Hata", "Çıkış yaparken hata oluştu.");
+    }
+  };
 
   const handleUpdateUser = async () => {
     try {
@@ -59,7 +67,7 @@ const AccountDetails = () => {
       }
     } catch (err) {
       console.error("Error updating user details: ", err);
-      Alert.alert("Hata", err.response?.data?.message || "Kullanıcı bilgilerini güncellerken hata oluştu.");
+      Alert.alert("Error", err.response?.data?.message || "An error occurred while updating user details.");
     }
   };
 
@@ -70,7 +78,7 @@ const AccountDetails = () => {
       await logout();
     } catch (err) {
       console.error("Error deleting account:", err);
-      Alert.alert("Error", err.response?.data?.message || "Hesap kaldırılırken bir hata oluştu.");
+      Alert.alert("Error", err.response?.data?.message || "An error occurred while deleting the account.");
     }
   };
 
@@ -104,40 +112,69 @@ const AccountDetails = () => {
         {userDetails ? (
           <>
             <Paragraph>Ad Soyad: {userDetails?.fullName || "N/A"}</Paragraph>
-            <Paragraph>TCKN: {userDetails?.tckn || "N/A"}</Paragraph>
+            <Paragraph>TC Kimlik No: {userDetails?.tckn || "N/A"}</Paragraph>
             <Paragraph>Doğum Tarihi: {userDetails?.birthDate || "N/A"}</Paragraph>
           </>
         ) : (
-          <Paragraph>Bilgiler yükleniyor...</Paragraph>
+          <Paragraph>Yükleniyor...</Paragraph>
         )}
-        <Button title="Bilgileri Güncelle" onPress={() => setUpdateModalVisible(true)} />
-        <Button title="Hesabı Sil" onPress={() => setDeleteModalVisible(true)} color="red" />
+        <Button mode="contained" onPress={() => setUpdateModalVisible(true)} style={styles.button}>
+          Bilgileri Güncelle
+        </Button>
+        <Button mode="contained" onPress={() => setDeleteModalVisible(true)} style={styles.button} color="red">
+          Hesabı Sil
+        </Button>
+        <Button mode="contained" onPress={() => setLogoutModalVisible(true)} style={styles.button} color="orange">
+          Çıkış Yap
+        </Button>
       </Card>
 
       {/* Update Modal */}
-      <Modal visible={updateModalVisible} animationType="slide" onRequestClose={() => setUpdateModalVisible(false)}>
-        <View style={styles.modalContainer}>
-          <Text style={styles.modalTitle}>Bilgileri Güncelle</Text>
-
-          <TextInput style={styles.input} placeholder="Ad Soyad" value={formData.fullName} onChangeText={(text) => handleInputChange("fullName", text)} />
-
-          <TextInput style={styles.input} placeholder="Doğum Tarihi (YYYY-MM-DD)" value={formData.birthDate} onChangeText={(text) => handleInputChange("birthDate", text)} />
-
-          <Button title="Kaydet" onPress={handleUpdateUser} />
-          <Button title="İptal" onPress={() => setUpdateModalVisible(false)} color="gray" />
-        </View>
-      </Modal>
+      <Portal>
+        <Dialog visible={updateModalVisible} onDismiss={() => setUpdateModalVisible(false)}>
+          <Dialog.Title>Bilgileri Güncelle</Dialog.Title>
+          <Dialog.Content>
+            <TextInput label="Ad Soyad" value={formData.fullName} onChangeText={(text) => handleInputChange("fullName", text)} style={styles.input} />
+            <TextInput label="Doğum Tarihi (YYYY-AA-GG)" value={formData.birthDate} onChangeText={(text) => handleInputChange("birthDate", text)} style={styles.input} />
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={handleUpdateUser}>Kaydet</Button>
+            <Button onPress={() => setUpdateModalVisible(false)}>Vazgeç</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
 
       {/* Delete Modal */}
-      <Modal visible={deleteModalVisible} animationType="slide" onRequestClose={() => setDeleteModalVisible(false)}>
-        <View style={styles.modalContainer}>
-          <Text style={styles.modalTitle}>Hesabı Sil</Text>
-          <Text>Bu işlem geri alınamaz. Emin misiniz?</Text>
+      <Portal>
+        <Dialog visible={deleteModalVisible} onDismiss={() => setDeleteModalVisible(false)}>
+          <Dialog.Title>Hesabınız Silinecektir</Dialog.Title>
+          <Dialog.Content>
+            <Text>Bu işlem geri alınamaz. Emin misiniz?</Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={handleDeleteAccount} color="red">
+              Evet, sil
+            </Button>
+            <Button onPress={() => setDeleteModalVisible(false)}>Vazgeç</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
 
-          <Button title="Evet, Sil" onPress={handleDeleteAccount} color="red" />
-          <Button title="İptal" onPress={() => setDeleteModalVisible(false)} color="gray" />
-        </View>
-      </Modal>
+      {/* Logout Modal */}
+      <Portal>
+        <Dialog visible={logoutModalVisible} onDismiss={() => setLogoutModalVisible(false)}>
+          <Dialog.Title>Çıkış Yap</Dialog.Title>
+          <Dialog.Content>
+            <Text>Çıkış yapmak istediğinden emin misin?</Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={handleLogout} color="orange">
+              Evet, çıkış yap
+            </Button>
+            <Button onPress={() => setLogoutModalVisible(false)}>Vazgeç</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </View>
   );
 };
@@ -150,13 +187,8 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: "#f5f5f5",
   },
-  center: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
   card: {
-    width: width * 0.9, // Adjust card width dynamically
+    width: width * 0.9,
     padding: 16,
     backgroundColor: "white",
     borderRadius: 8,
@@ -168,32 +200,22 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     textAlign: "center",
   },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 16,
-    backgroundColor: "white",
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 16,
-  },
   input: {
-    width: width * 0.8, // Adjust input width dynamically
-    height: 50,
-    borderColor: "#ccc",
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingLeft: 10,
     marginBottom: 16,
+  },
+  button: {
+    marginTop: 8,
   },
   errorText: {
     color: "red",
     fontSize: 16,
     textAlign: "center",
     paddingHorizontal: 16,
+  },
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 
