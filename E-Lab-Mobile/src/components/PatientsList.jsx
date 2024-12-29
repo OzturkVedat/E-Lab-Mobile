@@ -8,21 +8,21 @@ import axiosInstance from "../utils/axiosSetup";
 
 const PatientsList = () => {
   const [patients, setPatients] = useState([]);
-  const [searchResults, setSearchResults] = useState([]); // New state for search results
+  const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [snackbarVisible, setSnackbarVisible] = useState(false);
 
   const navigation = useNavigation();
-  const insets = useSafeAreaInsets(); // Get safe area insets
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     const fetchPatients = async () => {
       try {
         const response = await axiosInstance.get("/admin/all-patient-details");
         if (response.status === 200 && response.data) {
-          setPatients(response.data.data); // Store full list of patients
+          setPatients(response.data.data);
         } else {
           setError("Hasta bilgileri getirilemedi.");
         }
@@ -39,21 +39,21 @@ const PatientsList = () => {
   const handleSearch = async () => {
     if (!searchQuery.trim() || searchQuery.length < 1) {
       setError("Lütfengeçerli bir isim girin.");
-      setSearchResults([]); // Reset search results
+      setSearchResults([]);
       return;
     }
 
     setLoading(true);
     setError("");
-    setSearchResults([]); // Clear previous search results
+    setSearchResults([]);
 
     try {
       const response = await axiosInstance.get(`/admin/patient-by-fullname/${searchQuery}`);
       if (response.status === 200 && response.data) {
-        setSearchResults(response.data.data); // Store search results
+        setSearchResults(response.data.data);
       } else {
         setError("Sonuç bulunamadı.");
-        setSearchResults([]); // Clear search results if no match
+        setSearchResults([]);
       }
     } catch (err) {
       console.error("Error searching patients:", err);
@@ -65,7 +65,7 @@ const PatientsList = () => {
 
   const debouncedSearch = useCallback(debounce(handleSearch, 500), []);
 
-  const dataToDisplay = searchQuery.trim() && searchResults.length > 0 ? searchResults : patients; // Display search results or all patients
+  const dataToDisplay = searchQuery.trim() && searchResults.length > 0 ? searchResults : patients;
 
   return (
     <View style={[styles.container, { paddingTop: 70 }]}>
@@ -101,13 +101,11 @@ const PatientsList = () => {
           {error}
         </Snackbar>
       )}
-      {/* No Results */}
       {!loading && dataToDisplay.length === 0 && !error && (
         <View style={styles.center}>
           <Paragraph>Sonuç bulunamadı.</Paragraph>
         </View>
       )}
-      {/* Patient List */}
       {!loading && !error && dataToDisplay.length > 0 && (
         <FlatList
           data={dataToDisplay}
@@ -116,7 +114,7 @@ const PatientsList = () => {
             <Card style={styles.card} onPress={() => navigation.navigate("TestResults", { patientId: item.patientId, patientName: item.fullName })}>
               <Title>{item.fullName}</Title>
               <Paragraph>TCKN: {item.tckn}</Paragraph>
-              <Paragraph>Cinsiyet: {item.gender === 0 ? "Erkek" : "Kadın"}</Paragraph>
+              <Paragraph>Cinsiyet: {item.gender === 0 ? "Erkek" : "Kız"}</Paragraph>
             </Card>
           )}
           contentContainerStyle={styles.listContainer}
