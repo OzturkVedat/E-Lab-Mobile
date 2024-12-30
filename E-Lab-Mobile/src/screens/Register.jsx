@@ -5,6 +5,7 @@ import { StyleSheet } from "react-native";
 import { TextInput as PaperInput, Button as PaperButton, Snackbar, RadioButton } from "react-native-paper";
 import axios from "axios";
 import Constants from "expo-constants";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 const baseURL = Constants.expoConfig.extra.apiBaseUrl;
 
@@ -25,6 +26,8 @@ const RegisterScreen = () => {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   const navigation = useNavigation();
 
@@ -49,12 +52,26 @@ const RegisterScreen = () => {
     }
   };
 
+  const handleDateChange = (event, date) => {
+    const currentDate = date || selectedDate;
+    setShowDatePicker(false);
+    setSelectedDate(currentDate);
+    handleChange("birthDate", currentDate.toISOString().split("T")[0]); // Format the date to YYYY-MM-DD
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Kayıt Ol</Text>
       <PaperInput label="Ad Soyad" value={formData.fullName} onChangeText={(value) => handleChange("fullName", value)} style={styles.input} mode="outlined" />
       <PaperInput label="TC Kimlik No" value={formData.tckn} onChangeText={(value) => handleChange("tckn", value)} style={styles.input} keyboardType="numeric" mode="outlined" />
-      <PaperInput label="Doğum Tarihi (YYYY-AA-GG)" value={formData.birthDate} onChangeText={(value) => handleChange("birthDate", value)} style={styles.input} mode="outlined" />
+
+      <PaperButton mode="outlined" onPress={() => setShowDatePicker(true)} style={styles.input}>
+        Doğum Tarihi Seç
+      </PaperButton>
+      <Text style={styles.input}>{formData.birthDate ? `Doğum Tarihi: ${formData.birthDate}` : "Doğum Tarihi Seçilmedi"}</Text>
+
+      {showDatePicker && <DateTimePicker value={selectedDate} mode="date" display="default" onChange={handleDateChange} locale="tr-TR" />}
+
       <PaperInput label="Şifre" value={formData.password} onChangeText={(value) => handleChange("password", value)} style={styles.input} secureTextEntry mode="outlined" />
       <Text style={styles.genderLabel}>Cinsiyet:</Text>
       <RadioButton.Group onValueChange={(value) => handleChange("gender", value)} value={formData.gender}>

@@ -168,10 +168,10 @@ const AccountDetails = () => {
             <Text>Çıkış yapmak istediğinden emin misin?</Text>
           </Dialog.Content>
           <Dialog.Actions>
-            <Button onPress={handleLogout} color="orange">
+            <Button onPress={() => setLogoutModalVisible(false)}>Vazgeç</Button>
+            <Button onPress={handleLogout} buttonColor="orange">
               Evet, çıkış yap
             </Button>
-            <Button onPress={() => setLogoutModalVisible(false)}>Vazgeç</Button>
           </Dialog.Actions>
         </Dialog>
       </Portal>
